@@ -1,6 +1,6 @@
 installCRDs: false
-prometheus:
-  enabled: true
+# prometheus:
+#   enabled: true
 resources:
   requests:
     cpu: 10m
