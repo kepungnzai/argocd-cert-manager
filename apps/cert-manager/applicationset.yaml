@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cert-manager
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/kepungnzai/argocd-cert-manager   # <-- replace with your actual repo URL
+        revision: main
+        files:
+          - path: "apps/cert-manager/envs/*.yaml"
+  template:
+    metadata:
+      name: 'cert-manager-{{env}}'
+    spec:
+      project: default
+      sources:
+        - repoURL: https://charts.jetstack.io
+          chart: cert-manager
+          targetRevision: '{{targetRevision}}'
+          helm:
+            valueFiles:
+              - $values/apps/cert-manager/values/base.yaml
+              - $values/apps/cert-manager/values/{{env}}.yaml
+        - repoURL: https://github.com/kepungnzai/argocd-cert-manager   # <-- must match repoURL above exactly
+          targetRevision: main
+          ref: values
+      destination:
+        server: '{{cluster}}'
+        namespace: cert-manager
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
